@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Cropper</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    input, select, button { margin: 6px 0; padding: 8px; width: 100%; box-sizing: border-box; }
+    button { background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; }
+    img { max-width: 100%; margin-top: 20px; border: 1px solid #ccc; }
+    .fields { display: none; }
+    .fields.active { display: block; }
+  </style>
+</head>
+<body>
+  <h2>Image Cropper</h2>
+
+  <input type="file" id="fileInput" accept="image/*" />
+
+  <select id="mode" onchange="toggleFields()">
+    <option value="rectangle">Rectangle</option>
+    <option value="circle">Circle</option>
+  </select>
+
+  <div id="rectFields" class="fields active">
+    <input type="number" id="x" placeholder="X" />
+    <input type="number" id="y" placeholder="Y" />
+    <input type="number" id="w" placeholder="Width" />
+    <input type="number" id="h" placeholder="Height" />
+  </div>
+
+  <div id="circleFields" class="fields">
+    <input type="number" id="cx" placeholder="Center X" />
+    <input type="number" id="cy" placeholder="Center Y" />
+    <input type="number" id="radius" placeholder="Radius" />
+  </div>
+
+  <button onclick="crop()">Crop</button>
+
+  <div id="output"></div>
+
+  <script>
+    function toggleFields() {
+      const mode = document.getElementById("mode").value;
+      document.getElementById("rectFields").classList.toggle("active", mode === "rectangle");
+      document.getElementById("circleFields").classList.toggle("active", mode === "circle");
+    }
+
+    async function crop() {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) return alert("Please select an image");
+
+      const mode = document.getElementById("mode").value;
+      const form = new FormData();
+      form.append("file", file);
+
+      let url;
+      if (mode === "rectangle") {
+        url = "/crop/rectangle";
+        form.append("x", document.getElementById("x").value);
+        form.append("y", document.getElementById("y").value);
+        form.append("w", document.getElementById("w").value);
+        form.append("h", document.getElementById("h").value);
+      } else {
+        url = "/crop/circle";
+        form.append("cx", document.getElementById("cx").value);
+        form.append("cy", document.getElementById("cy").value);
+        form.append("radius", document.getElementById("radius").value);
+      }
+
+      const res = await fetch(url, { method: "POST", body: form });
+      if (!res.ok) return alert("Crop failed");
+
+      const blob = await res.blob();
+      const imgUrl = URL.createObjectURL(blob);
+      document.getElementById("output").innerHTML = `
+        <img src="${imgUrl}" />
+        <a href="${imgUrl}" download="cropped"><button>Download</button></a>
+      `;
+    }
+  </script>
+</body>
+</html>
