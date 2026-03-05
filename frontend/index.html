@@ -56,13 +56,13 @@
 
       let url;
       if (mode === "rectangle") {
-        url = "/crop/rectangle";
+        url = "/api/crop/rectangle";
         form.append("x", document.getElementById("x").value);
         form.append("y", document.getElementById("y").value);
         form.append("w", document.getElementById("w").value);
         form.append("h", document.getElementById("h").value);
       } else {
-        url = "/crop/circle";
+        url = "/api/crop/circle";
         form.append("cx", document.getElementById("cx").value);
         form.append("cy", document.getElementById("cy").value);
         form.append("radius", document.getElementById("radius").value);
